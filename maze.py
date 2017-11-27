@@ -4,9 +4,30 @@ CSCI 121
 from Myro import*
 
 def move():
- 
+    
+    currentLight=getLight()
+
     while True:
         getLine()
+
+        #light sensor
+        elapsedLight=getLight()
+        
+        if currentLight[0]-elapsedLight[0]>10000 or currentLight[1]-elapsedLight[1]>10000 or currentLight[2]-elapsedLight[2]>10000 :
+            turnRight(1,1.2)
+            pic=takePicture()
+            show(pic)
+            #save(pic)
+            turnRight(1,.2)
+            pic=takePicture()
+            show(pic)
+            #save(pic)
+            turnRight(1,.2)
+            pic=takePicture()
+            show(pic)
+            #save(pic)
+            turnRight(1,1.1)
+            elapsedLight=getLight()
         
         #Just in case, for whatever reason, the robot is still on the line
         if getLine("left") == 1 or getLine("right") == 1:
