@@ -1,0 +1,15 @@
+class Robot:
+    # remember to look for a wall or object before starting.
+
+
+    def robotFSM ():
+        START = 0
+        MOVE = 1
+        CHECKFORWALL = 2
+        FOUNDOBJECT = 3
+        FOUNDMOOB = 4
+        WAIT = 5
+        END = 6
+        currentState = START
+
+    # place other code below this and implement states
