@@ -139,10 +139,10 @@ class Saber:
                 
             elif getLight("left")<50000 or getLight("center")<50000 or getLight("right")<50000 :
                 stop()
-                turnBy(160)
-                for i in range(5):
+                turnBy(180)
+                for i in range(18):
                 
-                    turnBy(10)
+                    turnBy(20)
                     pic=takePicture()
                     show(pic)
                     picName='picture.jpg'
@@ -156,6 +156,7 @@ class Saber:
                     cmdInJSONFormat = getCommand(url)
 
                     print(cmdInJSONFormat)
+                turnBy(180)
                     
                     
 
@@ -164,12 +165,6 @@ class Saber:
 
 
 
- 
-url ='http://localhost:8080/robot'
-cmdInJSONFormat = getCommand(url)
-
-print(cmdInJSONFormat)
-cmdInJSONFormat = deleteCommand(url)
 #go = Saber(.4,3)
 #go.search()
 #go.naviMaze()
