@@ -10,59 +10,7 @@ def normalize(v):
         v = ambient
     return 1.0 - v/ambient
     
-def checkForLight(speed,time):
-    speak("found unidentified object")    
-    startTime = currentTime()
-    elaspedTime = currentTime() - startTime
-            
-    while True:
-        backward(.4)
-        print(normalize(30000))
-        elaspedTime = currentTime() - startTime
-        if normalize(30000) < .525:
-            
-            stop()
-            speak("found light")
-            turnBy(180)
-            pic=takePicture()
-            show(pic)
-            picName= 'picture.jpg'
-            savePicture(pic,picName)
-            #sendPicToServer(picName)
-                
-            for i in range(23):         
-                turnBy(15)
-                pic=takePicture()
-                show(pic)
-                picName='picture.jpg'
-                savePicture(pic,picName)
-              # sendPicToServer(picName)
-                url ='http://localhost:8080/robot'          
-                postImage(url,picName)
-                cmdInJSONFormat = getCommand(url)
-                print(cmdInJSONFormat)
-                    
-            turnBy(180)
-            backward(.2,.4)
-            break
-            
-        elif elaspedTime >= 1.5:
-            stop()
-            turnBy(90)
-            count = 0
-            move(speed,time)
-            turnBy(-90)
-            move(speed,time*1.3)
-            turnBy(-90)
-            findLine(.5)
-            startTime = currentTime()
-            break
-            
-        elif getLine("left") or getLine("right"):
-            forward(.5,1)
-            turnBy(90)
-            break    
-
+           
 def findLine(speed):
     while True:
             
@@ -107,7 +55,8 @@ def move(speed,time):
             stop()
             break                    
             
-           
+            
+            
             
             
 
@@ -192,7 +141,13 @@ class Saber:
     def naviMaze(self):
         left = getLine("left")
         right = getLine("right")
+        MOVE = 1
+        CHECK_WALL = 2
+        SEARCH_LIGHT = 3
+        FOUND_WALL = 4
         
+        otherState = FOUND_WALL
+        currentState = MOVE
         
         findLine(self.speed)
         
@@ -202,81 +157,109 @@ class Saber:
                 
         while light == False:
 
-            backward(self.speed)
-            print(normalize(30000))
-            
+            backward(self.speed) 
             
             elaspedTime = currentTime() - startTime
-            #print(normalize(30000))
             
-            if (elaspedTime <= self.time) and (getLine("left") == 1 or getLine("right") == 1):
-                forward(.5,1)
-                turnBy(90)
-                count = 0
-                startTime = currentTime()
-                continue
-                    
-            elif(elaspedTime >= self.time):  
-                stop()
-                if count == 3:
+            if (getLine("left") == 1 or getLine("right") == 1):
+                
+                if currentState == CHECK_WALL or currentState == MOVE:
+                    forward(.5,1)
                     turnBy(90)
                     count = 0
-
-                else:  
+                    currentState = MOVE
+                    if (getLine("left") == 1 or getLine("right") == 1):
+                        forward(.5,1)
+                        turnBy(90)
+                    startTime = currentTime()
+                    continue
+                    
+            elif(elaspedTime >= self.time):
+            
+                
+                if (getLine("left") == 1 or getLine("right") == 1):
+                    forward(.5,1)
+                    turnBy(90)
+                    count = 0
+                    startTime = currentTime()
+                    continue
+                elif currentState == MOVE:  
+                    stop()
                     turnBy(-90)
-                    count += 1
-
-
-                startTime = currentTime()
-                continue
+                    currentState = CHECK_WALL
+                    count+=1
+                    startTime = currentTime()
+                    continue
+                        
+                else:
+                    if count == 1:
+                        stop()
+                        turnBy(-90)
+                        count = 0
+                        startTime = currentTime()
+                        continue
                 
                 
             elif normalize(30000) < .49:
-                light = True
-                stop()
-                speak("found light")
-                turnBy(180)
-                pic=takePicture()
-                show(pic)
-                picName= 'picture.jpg'
-                savePicture(pic,picName)
-                #sendPicToServer(picName)
-                
-                for i in range(23):
-                
-                    turnBy(15)
+                if otherState == SEARCH_LIGHT:
+                    light = True
+                    stop()
+                    speak("found light")
+                    turnBy(180)
                     pic=takePicture()
                     show(pic)
-                    picName='picture.jpg'
+                    picName= 'picture.jpg'
                     savePicture(pic,picName)
-                   # sendPicToServer(picName)
-                    url ='http://localhost:8080/robot'
-                    postImage(url,picName)
-                backward(.2,.4)
-                cmdInJSONFormat = getCommand(url)
+                    #sendPicToServer(picName)
+                    
+                    for i in range(23):
+                    
+                        turnBy(15)
+                        pic=takePicture()
+                        show(pic)
+                        picName='picture.jpg'
+                        savePicture(pic,picName)
+                       # sendPicToServer(picName)
+                        url ='http://localhost:8080/robot'
+                        postImage(url,picName)
+                    backward(.2,.4)
+                    cmdInJSONFormat = getCommand(url)
 
-                print(cmdInJSONFormat)
-                    
-                    
-                turnBy(180)
+                    print(cmdInJSONFormat)
+                        
+                    turnBy(180)
+                    break
                 
                 
             elif (getIR("left") == 0 or getIR("right") == 0): 
                 
                 
-                stop()
-                checkForLight(.7,2.5)
-                if normalize(30000) < .525:
-                    break
-               
-                
-                            
+                if otherState == FOUND_WALL:
+                    stop() 
+                    backward(.5,1.5)
+                    turnBy(90)
+                    backward(.5,3.5)
+                    if (getLine("left") == 1 or getLine("right") == 1):
+                        forward(.5,1)
+                        turnBy(-90)
+                    turnBy(-90)
+                    backward(.8,4)
+                    if (getLine("left") == 1 or getLine("right") == 1):
+                        forward(.5,1)
+                        turnBy(-90)
+                    turnBy(-90)
+                    count = 0
+                    otherState = SEARCH_LIGHT
+                    currentState = CHECK_WALL
+                    startTime = currentTime()
+                    
+
  
 url ='http://localhost:8080/robot'
 cmdInJSONFormat = getCommand(url)
 
 print(cmdInJSONFormat)
 cmdInJSONFormat = deleteCommand(url)
-go = Saber(.6,4)
+go = Saber(.5,3.5)
 #go.search()
 go.naviMaze()
